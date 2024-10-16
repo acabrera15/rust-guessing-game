@@ -1,37 +1,70 @@
 use rand::Rng;
 use std::cmp::Ordering;
-use std::io;
+use std::io::{self, Write};
+
+fn yes_or_no() -> bool {
+    let mut input = String::new();
+    loop {
+        print!("Please enter y/n: ");
+        io::stdout().flush().expect("Failed to flush output");
+
+        input.clear(); // Clear previous input
+        io::stdin()
+            .read_line(&mut input)
+            .expect("Failed to read input");
+
+        match input.trim().to_lowercase().as_str() {
+            "y" => return true,
+            "n" => return false,
+            _ => println!("Invalid input, please enter 'y' or 'n'."),
+        }
+    }
+}
+
 fn main() {
     println!("Welcome to the guessing game!");
 
-    let secret_number = rand::thread_rng().gen_range(1..=100);
-    println!("number secret is: {secret_number}");
-
     loop {
-        println!("enter your guess");
+        let secret_number = rand::thread_rng().gen_range(1..=100);
 
-        let mut guess = String::new();
+        loop {
+            println!("enter your guess");
 
-        io::stdin()
-            .read_line(&mut guess)
-            .expect("There was an issue reading the line");
+            let mut guess = String::new();
 
-        // convert to number to match secret number
-        let guess: u32 = match guess.trim().parse() {
-            Ok(num) => num,
-            Err(_) => continue,
-        };
+            io::stdin()
+                .read_line(&mut guess)
+                .expect("There was an issue reading the line");
 
-        println!("Your guess was: {guess}");
+            // convert to number to match secret number
+            let guess: u32 = match guess.trim().parse() {
+                Ok(num) => num,
+                Err(_) => {
+                    println!("Please input a number");
+                    continue;
+                }
+            };
 
-        // handle compare options
-        match guess.cmp(&secret_number) {
-            Ordering::Less => println!("Too small!"),
-            Ordering::Greater => println!("Too large!"),
-            Ordering::Equal => {
-                println!("You win!");
-                break;
+            println!("Your guess was: {guess}");
+
+            // handle compare options
+            match guess.cmp(&secret_number) {
+                Ordering::Less => println!("Too small!"),
+                Ordering::Greater => println!("Too large!"),
+                Ordering::Equal => {
+                    println!("You win!");
+                    break;
+                }
             }
+        }
+
+        println!("Would you like to play again? (y/n)");
+
+        let input = yes_or_no();
+
+        if !input {
+            print!("Thank you for playing. Come back again.");
+            break;
         }
     }
 }
